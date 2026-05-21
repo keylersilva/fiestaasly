@@ -46,6 +46,7 @@ import {
 
 const OPENWA_SESSION_URL = import.meta.env.VITE_OPENWA_URL || 'http://localhost:2785/api/sessions/72399631-de09-4968-a6ac-e1bc64ca690e/messages/send-text';
 const API_FUNCTION_URL = import.meta.env.VITE_FUNCTION_URL || '/api/send-whatsapp';
+const VITE_PROXY_URL = '/api/proxy/sessions/72399631-de09-4968-a6ac-e1bc64ca690e/messages/send-text';
 
 function normalizePhoneNumber(phone: string): string {
   let cleaned = phone.replace(/[\s\-\(\)]/g, '');
@@ -82,22 +83,25 @@ async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolea
   try {
     const response = await fetch(API_FUNCTION_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chatId, text }),
     });
     if (response.ok) return true;
-  } catch {
-    // fallback to direct OpenWA (dev mode)
-  }
+  } catch {}
+
+  try {
+    const response = await fetch(VITE_PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatId, text }),
+    });
+    if (response.ok) return true;
+  } catch {}
 
   try {
     const response = await fetch(OPENWA_SESSION_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chatId, text }),
     });
     return response.ok;
