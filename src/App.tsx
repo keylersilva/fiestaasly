@@ -83,29 +83,12 @@ Hola *${name}*, hemos registrado con éxito tu asistencia para el cumpleaños de
 }
 
 async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolean> {
-  // 🛡️ Preparamos las cabeceras con la llave de seguridad inyectada
   const requestHeaders = { 
     'Content-Type': 'application/json',
     'x-api-key': OPENWA_API_KEY
   };
 
-  try {
-    const response = await fetch(API_FUNCTION_URL, {
-      method: 'POST',
-      headers: requestHeaders,
-      body: JSON.stringify({ chatId, text }),
-    });
-    if (response.ok) return true;
-  } catch {}
-
-  try {
-    const response = await fetch(VITE_PROXY_URL, {
-      method: 'POST',
-      headers: requestHeaders,
-      body: JSON.stringify({ chatId, text }),
-    });
-    if (response.ok) return true;
-  } catch {}
+  console.log("🚀 Disparando mensaje directo a Ngrok...");
 
   try {
     const response = await fetch(OPENWA_SESSION_URL, {
@@ -113,8 +96,11 @@ async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolea
       headers: requestHeaders,
       body: JSON.stringify({ chatId, text }),
     });
+    
+    console.log("🛡️ Estatus de respuesta OpenWA:", response.status);
     return response.ok;
-  } catch {
+  } catch (error) {
+    console.error("❌ El túnel bloqueó la petición:", error);
     return false;
   }
 }
