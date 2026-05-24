@@ -44,9 +44,12 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const OPENWA_SESSION_URL = import.meta.env.VITE_OPENWA_URL || 'http://localhost:2785/api/sessions/72399631-de09-4968-a6ac-e1bc64ca690e/messages/send-text';
+const OPENWA_SESSION_URL = import.meta.env.VITE_OPENWA_URL || 'https://mashing-aim-abstain.ngrok-free.dev/api/sessions/99b69377-735a-4ceb-bfc9-d69c9b1f66b6/messages/send-text';
 const API_FUNCTION_URL = import.meta.env.VITE_FUNCTION_URL || '/api/send-whatsapp';
-const VITE_PROXY_URL = '/api/proxy/sessions/72399631-de09-4968-a6ac-e1bc64ca690e/messages/send-text';
+const VITE_PROXY_URL = '/api/proxy/sessions/99b69377-735a-4ceb-bfc9-d69c9b1f66b6/messages/send-text';
+
+// 🔑 Declaramos tu Llave Maestra de OpenWA
+const OPENWA_API_KEY = 'owa_k1_1df2f9608590d79647db52e85b15ff4a774daabb3de6f52736ca5b7cf1a1e3e5';
 
 function normalizePhoneNumber(phone: string): string {
   let cleaned = phone.replace(/[\s\-\(\)]/g, '');
@@ -80,10 +83,16 @@ Hola *${name}*, hemos registrado con éxito tu asistencia para el cumpleaños de
 }
 
 async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolean> {
+  // 🛡️ Preparamos las cabeceras con la llave de seguridad inyectada
+  const requestHeaders = { 
+    'Content-Type': 'application/json',
+    'x-api-key': OPENWA_API_KEY
+  };
+
   try {
     const response = await fetch(API_FUNCTION_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: requestHeaders,
       body: JSON.stringify({ chatId, text }),
     });
     if (response.ok) return true;
@@ -92,7 +101,7 @@ async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolea
   try {
     const response = await fetch(VITE_PROXY_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: requestHeaders,
       body: JSON.stringify({ chatId, text }),
     });
     if (response.ok) return true;
@@ -101,7 +110,7 @@ async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolea
   try {
     const response = await fetch(OPENWA_SESSION_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: requestHeaders,
       body: JSON.stringify({ chatId, text }),
     });
     return response.ok;
