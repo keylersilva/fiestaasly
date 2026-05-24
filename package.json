@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "ngrok": ".bin/ngrok http 2785",
+    "deploy:build": "vite build",
+    "functions:deploy": "cd functions && npm install && cd .. && firebase deploy --only functions"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

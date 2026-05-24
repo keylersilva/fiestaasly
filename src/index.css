@@ -20,20 +20,3 @@
     background-attachment: fixed;
   }
 }
-
-.baby-bg {
-  background-color: #000;
-  background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-    url('/fotoashly.webp');
-  background-size: cover;
-  background-position: 75% center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-}
-
-@media (min-width: 768px) {
-  .baby-bg {
-    background-position: center;
-  }
-}

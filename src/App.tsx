@@ -33,8 +33,91 @@ import {
   Settings,
   Calendar,
   MapPin,
-  Baby
+  Baby,
+  Instagram,
+  Facebook,
+  Youtube,
+  Mail,
+  Phone,
+  X,
+  MessageCircle,
+  Sparkles
 } from 'lucide-react';
+
+const OPENWA_SESSION_URL = import.meta.env.VITE_OPENWA_URL || 'https://mashing-aim-abstain.ngrok-free.dev/api/sessions/99b69377-735a-4ceb-bfc9-d69c9b1f66b6/messages/send-text';
+const API_FUNCTION_URL = import.meta.env.VITE_FUNCTION_URL || '/api/send-whatsapp';
+const VITE_PROXY_URL = '/api/proxy/sessions/99b69377-735a-4ceb-bfc9-d69c9b1f66b6/messages/send-text';
+
+// 🔑 Declaramos tu Llave Maestra de OpenWA
+const OPENWA_API_KEY = 'owa_k1_1df2f9608590d79647db52e85b15ff4a774daabb3de6f52736ca5b7cf1a1e3e5';
+
+function normalizePhoneNumber(phone: string): string {
+  let cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  if (cleaned.startsWith('+')) {
+    cleaned = cleaned.substring(1);
+  }
+  if (cleaned.startsWith('57') && cleaned.length > 10) {
+    cleaned = cleaned.substring(2);
+  }
+  if (cleaned.length === 10) {
+    cleaned = '57' + cleaned;
+  }
+  return cleaned;
+}
+
+function buildChatId(phone: string): string {
+  const normalized = normalizePhoneNumber(phone);
+  return `${normalized}@c.us`;
+}
+
+function buildConfirmationMessage(name: string): string {
+  return `🎉 *¡Asistencia Confirmada!* 👶🍼
+
+Hola *${name}*, hemos registrado con éxito tu asistencia para el cumpleaños de nuestra bebé Ashly Sofía 🎂✨
+
+📅 *Fecha:* Sábado, 23 de Mayo
+⏰ *Hora:* 4:00 PM
+📍 *Lugar:* [Agregar dirección aquí]
+
+💖 ¡Estamos felices de compartir este momento contigo!`;
+}
+
+async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolean> {
+  // 🛡️ Preparamos las cabeceras con la llave de seguridad inyectada
+  const requestHeaders = { 
+    'Content-Type': 'application/json',
+    'x-api-key': OPENWA_API_KEY
+  };
+
+  try {
+    const response = await fetch(API_FUNCTION_URL, {
+      method: 'POST',
+      headers: requestHeaders,
+      body: JSON.stringify({ chatId, text }),
+    });
+    if (response.ok) return true;
+  } catch {}
+
+  try {
+    const response = await fetch(VITE_PROXY_URL, {
+      method: 'POST',
+      headers: requestHeaders,
+      body: JSON.stringify({ chatId, text }),
+    });
+    if (response.ok) return true;
+  } catch {}
+
+  try {
+    const response = await fetch(OPENWA_SESSION_URL, {
+      method: 'POST',
+      headers: requestHeaders,
+      body: JSON.stringify({ chatId, text }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
 
 // Types
 interface Config {
@@ -47,7 +130,7 @@ interface Config {
 interface Guest {
   id: string;
   name: string;
-  email: string;
+  whatsapp: string;
   companions: number;
   checkedIn: boolean;
   registeredAt: any;
@@ -161,7 +244,10 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen baby-bg">
+    <div className="min-h-screen relative">
+      {/* Fixed background layer for parallax effect on mobile */}
+      <div className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'linear-gradient(rgba(0,0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(/fotoashly.webp)' }} />
+      
       {/* Navigation */}
       <nav className="p-4 flex justify-between items-center max-w-5xl mx-auto border-b border-white/10">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
@@ -232,9 +318,110 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-white/10 mt-20 text-center">
-        <p className="text-white/50 text-sm italic font-serif">Hecho con amor para un día especial ✨</p>
+      <footer className="mt-20">
+        <Footer />
       </footer>
+    </div>
+  );
+}
+
+function Footer() {
+  const footerLinks = [
+    { label: 'Inicio', href: '#home' },
+    { label: 'Galería', href: '#gallery' },
+    { label: 'Confirmar asistencia', href: '#rsvp' },
+    { label: 'Ubicación', href: '#location' },
+    { label: 'Contacto', href: '#contact' },
+  ];
+
+  const socialLinks = [
+    { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
+    { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
+    { icon: Youtube, href: 'https://youtube.com', label: 'YouTube' },
+  ];
+
+  return (
+    <div className="bg-zinc-900/80 backdrop-blur-md border-t border-white/5">
+      <div className="max-w-5xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="bg-primary/20 p-2 rounded-full">
+                <Cake size={20} className="text-primary" />
+              </div>
+              <h3 className="font-serif font-semibold text-lg text-white">Mi Primer Cumpleaños</h3>
+            </div>
+            <h4 className="font-serif text-xl text-primary font-medium">Ashly Sofía</h4>
+            <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+              Una celebración mágica llena de amor, alegría y momentos preciosos. 
+              Gracias por ser parte de este día tan especial.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-serif font-semibold text-lg text-white">Enlaces Rápidos</h3>
+            <ul className="space-y-2">
+              {footerLinks.map((link) => (
+                <li key={link.label}>
+                  <a 
+                    href={link.href}
+                    className="text-white/60 text-sm hover:text-primary transition-colors duration-300"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-serif font-semibold text-lg text-white">Síguenos</h3>
+            <p className="text-white/60 text-sm">
+              Comparte este momento mágico con nosotros
+            </p>
+            <div className="flex gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-primary/20 hover:text-primary transition-all duration-300 border border-white/10 hover:border-primary/30"
+                >
+                  <social.icon size={18} />
+                </a>
+              ))}
+            </div>
+            <div className="pt-2 space-y-2">
+              <a href="mailto:celebration@ashly.com" className="flex items-center gap-2 text-white/60 text-sm hover:text-primary transition-colors">
+                <Mail size={14} />
+                celebration@ashly.com
+              </a>
+              <a href="tel:+1234567890" className="flex items-center gap-2 text-white/60 text-sm hover:text-primary transition-colors">
+                <Phone size={14} />
+                +1 234 567 890
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-white/10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <p className="text-white/40 text-xs">
+              © 2026 Mi Primer Cumpleaños Ashly Sofía. Todos los derechos reservados.
+            </p>
+            <a 
+              href="https://portafolio-keyler-silva.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary/80 text-xs hover:text-primary transition-colors duration-300 font-medium"
+            >
+              Desarrollado por Keyler Silva
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -242,11 +429,14 @@ export default function App() {
 // --- SUB-COMPONENTS ---
 
 function RegistrationView({ config }: { config: Config | null }) {
-  const [formData, setFormData] = useState({ name: '', email: '', companions: 0 });
+  const [formData, setFormData] = useState({ name: '', whatsapp: '', companions: 0 });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [totalRegistered, setTotalRegistered] = useState(0);
   const [vCode, setVCode] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [whatsappSent, setWhatsappSent] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'guests'), (snapshot) => {
@@ -267,12 +457,13 @@ function RegistrationView({ config }: { config: Config | null }) {
     if (isFull || !config?.registrationOpen) return;
     
     setStatus('loading');
+    setShowErrorModal(false);
     try {
       const verificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       setVCode(verificationCode);
       const guestData = {
         name: formData.name,
-        email: formData.email,
+        whatsapp: formData.whatsapp,
         companions: Number(formData.companions),
         checkedIn: false,
         registeredAt: Timestamp.now(),
@@ -280,56 +471,34 @@ function RegistrationView({ config }: { config: Config | null }) {
       };
       
       await addDoc(collection(db, 'guests'), guestData);
+      
+      const chatId = buildChatId(formData.whatsapp);
+      const message = buildConfirmationMessage(formData.name);
+      const sent = await sendWhatsAppMessage(chatId, message);
+      setWhatsappSent(sent);
+      setShowSuccessModal(true);
       setStatus('success');
     } catch (err) {
-      console.error(err);
       setStatus('error');
       setErrorMessage("No pudimos completar tu registro. Intenta de nuevo.");
+      setShowErrorModal(true);
     }
   };
 
-  if (status === 'success') {
-    return (
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md mx-auto text-center py-12 px-6 bg-white/90 backdrop-blur-md rounded-[3rem] shadow-2xl border border-primary/20 relative"
-      >
-        <div className="absolute -top-6 -left-6 transform -rotate-12">
-           <div className="bg-secondary p-3 rounded-2xl shadow-lg text-primary">
-             <Cake size={32} />
-           </div>
-        </div>
-        <div className="absolute -bottom-6 -right-6 transform rotate-12">
-           <div className="bg-accent p-3 rounded-2xl shadow-lg text-primary">
-             <Baby size={32} />
-           </div>
-        </div>
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setFormData({ name: '', whatsapp: '', companions: 0 });
+    setStatus('idle');
+  };
 
-        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-          <CheckCircle size={48} />
-        </div>
-        <h2 className="text-3xl font-serif font-bold mb-4 text-zinc-800">¡Registro Exitoso!</h2>
-        <p className="text-zinc-600 mb-8 leading-relaxed">
-          ¡Qué alegría! Te esperamos en la celebración de <strong>{config?.eventName}</strong>. 
-          Presenta este código al llegar:
-        </p>
-        <div className="bg-secondary/50 p-8 rounded-3xl border-2 border-dashed border-primary/40 mb-8 group hover:bg-secondary/70 transition-all cursor-default">
-            <p className="text-xs uppercase tracking-[0.3em] font-bold text-primary/60 mb-2">Código de Verificación</p>
-            <span className="text-5xl font-mono font-black tracking-[0.2em] text-primary drop-shadow-sm italic">#{vCode}</span>
-        </div>
-        <button 
-          onClick={() => setStatus('idle')}
-          className="px-6 py-2 bg-zinc-100 text-zinc-500 rounded-full text-sm font-bold hover:bg-zinc-200 transition-all"
-        >
-          Registrar a alguien más
-        </button>
-      </motion.div>
-    );
-  }
+  const handleCloseErrorModal = () => {
+    setShowErrorModal(false);
+    setStatus('idle');
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -392,14 +561,14 @@ function RegistrationView({ config }: { config: Config | null }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">Correo Electrónico</label>
+              <label className="block text-sm font-medium text-zinc-700 mb-1">Número de WhatsApp</label>
               <input 
                 required
-                type="email" 
-                value={formData.email}
-                onChange={e => setFormData({...formData, email: e.target.value})}
+                type="tel"
+                value={formData.whatsapp}
+                onChange={e => setFormData({...formData, whatsapp: e.target.value})}
                 className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                placeholder="tu@email.com"
+                placeholder="+57 300 123 4567"
               />
             </div>
             <div>
@@ -430,6 +599,120 @@ function RegistrationView({ config }: { config: Config | null }) {
         )}
       </motion.div>
     </div>
+
+    <AnimatePresence>
+      {showSuccessModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={handleCloseSuccessModal}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            className="bg-white/95 backdrop-blur-md rounded-[2rem] shadow-2xl border border-primary/20 max-w-md w-full p-8 relative overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="absolute -top-4 -left-4 transform -rotate-12">
+              <div className="bg-secondary p-3 rounded-2xl shadow-lg text-primary">
+                <Cake size={28} />
+              </div>
+            </div>
+            <div className="absolute -bottom-4 -right-4 transform rotate-12">
+              <div className="bg-accent p-3 rounded-2xl shadow-lg text-primary">
+                <Baby size={28} />
+              </div>
+            </div>
+            <button
+              onClick={handleCloseSuccessModal}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <CheckCircle size={40} />
+              </div>
+              <h2 className="text-3xl font-serif font-bold mb-4 text-zinc-800">¡Registro Exitoso!</h2>
+              <p className="text-zinc-600 mb-6 leading-relaxed">
+                ¡Qué alegría! Te esperamos en la celebración. Presenta este código al llegar:
+              </p>
+              <div className="bg-secondary/50 p-6 rounded-2xl border-2 border-dashed border-primary/40 mb-6">
+                <p className="text-xs uppercase tracking-[0.3em] font-bold text-primary/60 mb-2">Código de Verificación</p>
+                <span className="text-4xl font-mono font-black tracking-[0.2em] text-primary">#{vCode}</span>
+              </div>
+              {whatsappSent ? (
+                <div className="flex items-center justify-center gap-2 text-green-600 text-sm font-medium mb-6">
+                  <MessageCircle size={18} />
+                  <span>Mensaje de confirmación enviado por WhatsApp</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-amber-600 text-sm font-medium mb-6">
+                  <Sparkles size={18} />
+                  <span>Prepárate para recibir tu mensaje de confirmación</span>
+                </div>
+              )}
+              <button
+                onClick={handleCloseSuccessModal}
+                className="px-6 py-2 bg-primary text-white rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+              >
+                Registrar a alguien más
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    <AnimatePresence>
+      {showErrorModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={handleCloseErrorModal}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            className="bg-white/95 backdrop-blur-md rounded-[2rem] shadow-2xl border border-red-200 max-w-md w-full p-8 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={handleCloseErrorModal}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <X size={40} />
+              </div>
+              <h2 className="text-2xl font-serif font-bold mb-4 text-zinc-800">Ups, algo salió mal</h2>
+              <p className="text-zinc-600 mb-6 leading-relaxed">
+                {errorMessage}
+              </p>
+              <button
+                onClick={handleCloseErrorModal}
+                className="px-6 py-2 bg-zinc-100 text-zinc-700 rounded-full text-sm font-bold hover:bg-zinc-200 transition-all"
+              >
+                Entendido
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </>
   );
 }
 
@@ -447,7 +730,7 @@ function AdminDashboard({ config, guests }: { config: Config | null, guests: Gue
 
   const filteredGuests = guests.filter(g => 
     g.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    g.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    g.whatsapp.toLowerCase().includes(searchTerm.toLowerCase()) ||
     g.verificationCode.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -556,7 +839,7 @@ function AdminDashboard({ config, guests }: { config: Config | null, guests: Gue
                       <tr key={guest.id} className={`hover:bg-zinc-50 transition-colors ${guest.checkedIn ? 'bg-green-50/30' : ''}`}>
                         <td className="px-6 py-4">
                           <div className="font-medium text-zinc-900">{guest.name}</div>
-                          <div className="text-xs text-zinc-500">{guest.email}</div>
+                          <div className="text-xs text-zinc-500">{guest.whatsapp}</div>
                         </td>
                         <td className="px-6 py-4 text-center font-mono font-bold">
                           {1 + guest.companions}
