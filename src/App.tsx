@@ -43,6 +43,7 @@ import {
   MessageCircle,
   Sparkles
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const LOCAL_SESSION_PATH = '/api/sessions/cbf35a2c-52bb-463d-8d38-38487ed8c824/messages/send-text';
 const SESSION_URL = import.meta.env.VITE_OPENWA_URL || LOCAL_SESSION_PATH;
@@ -446,6 +447,17 @@ function RegistrationView({ config }: { config: Config | null }) {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (showSuccessModal) {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#FFD700', '#FF69B4', '#87CEEB', '#98FB98', '#DDA0DD', '#FF6B6B']
+      });
+    }
+  }, [showSuccessModal]);
 
   const spotsLeft = config ? config.totalSpots - totalRegistered : 0;
   const isFull = spotsLeft <= 0;
