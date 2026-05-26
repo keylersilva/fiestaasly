@@ -578,7 +578,7 @@ function RegistrationView({ config }: { config: Config | null }) {
             <button 
               type="submit"
               disabled={status === 'loading'}
-              className="w-full py-4 bg-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
+              className="w-full py-4 bg-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 active:brightness-90 active:shadow-none transition-all disabled:opacity-50 disabled:scale-100"
             >
               {status === 'loading' ? 'Registrando...' : 'Confirmar Registro'}
             </button>
