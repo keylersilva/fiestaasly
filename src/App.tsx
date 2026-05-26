@@ -659,7 +659,7 @@ function RegistrationView({ config }: { config: Config | null }) {
                 onClick={handleCloseSuccessModal}
                 className="px-6 py-2 bg-primary text-white rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
               >
-                Registrar a alguien más
+                Cerrar
               </button>
             </div>
           </motion.div>
