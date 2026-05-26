@@ -44,9 +44,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const OPENWA_SESSION_URL = import.meta.env.VITE_OPENWA_URL || 'https://mashing-aim-abstain.ngrok-free.dev/api/sessions/99b69377-735a-4ceb-bfc9-d69c9b1f66b6/messages/send-text';
-const API_FUNCTION_URL = import.meta.env.VITE_FUNCTION_URL || '/api/send-whatsapp';
-const VITE_PROXY_URL = '/api/proxy/sessions/99b69377-735a-4ceb-bfc9-d69c9b1f66b6/messages/send-text';
+const VITE_SESSION_PATH = '/api/sessions/cbf35a2c-52bb-463d-8d38-38487ed8c824/messages/send-text';
 
 // 🔑 Declaramos tu Llave Maestra de OpenWA
 const OPENWA_API_KEY = 'owa_k1_1df2f9608590d79647db52e85b15ff4a774daabb3de6f52736ca5b7cf1a1e3e5';
@@ -83,40 +81,35 @@ Hola *${name}*, hemos registrado con éxito tu asistencia para el cumpleaños de
 }
 
 async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolean> {
-  // 🛡️ Preparamos las cabeceras con la llave de seguridad inyectada
   const requestHeaders = { 
     'Content-Type': 'application/json',
     'x-api-key': OPENWA_API_KEY
   };
 
-  try {
-    const response = await fetch(API_FUNCTION_URL, {
-      method: 'POST',
-      headers: requestHeaders,
-      body: JSON.stringify({ chatId, text }),
-    });
-    if (response.ok) return true;
-  } catch {}
+  console.log("🚀 Disparando mensaje directo a Ngrok...");
 
   try {
-    const response = await fetch(VITE_PROXY_URL, {
+    const response = await fetch(VITE_SESSION_PATH, {
       method: 'POST',
       headers: requestHeaders,
       body: JSON.stringify({ chatId, text }),
     });
-    if (response.ok) return true;
-  } catch {}
-
-  try {
-    const response = await fetch(OPENWA_SESSION_URL, {
-      method: 'POST',
-      headers: requestHeaders,
-      body: JSON.stringify({ chatId, text }),
-    });
+    
+    console.log("🛡️ Estatus de respuesta OpenWA:", response.status);
     return response.ok;
-  } catch {
+  } catch (error) {
+    console.error("❌ El túnel bloqueó la petición:", error);
     return false;
   }
+}
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString('es-ES', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
 }
 
 // Types
@@ -244,12 +237,14 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen relative">
+    <div className="relative min-h-screen w-full">
       {/* Fixed background layer for parallax effect on mobile */}
       <div className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'linear-gradient(rgba(0,0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(/fotoashly.webp)' }} />
       
+      <div className="min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="p-4 flex justify-between items-center max-w-5xl mx-auto border-b border-white/10">
+      <nav className="w-full border-b border-white/10">
+        <div className="max-w-5xl mx-auto flex justify-between items-center px-4 py-4">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
           <div className="bg-primary p-2 rounded-full text-white shadow-lg shadow-primary/20">
             <Cake size={24} />
@@ -281,10 +276,11 @@ export default function App() {
             </button>
           )}
         </div>
+        </div>
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto p-4 py-8">
+      <main className="flex-1 flex flex-col justify-center max-w-5xl mx-auto px-4 pt-12 pb-32">
         <AnimatePresence mode="wait">
           {view === 'home' ? (
             <RegistrationView config={config} />
@@ -317,8 +313,10 @@ export default function App() {
         </AnimatePresence>
       </main>
 
+      </div>
+
       {/* Footer */}
-      <footer className="mt-20">
+      <footer>
         <Footer />
       </footer>
     </div>
@@ -513,7 +511,7 @@ function RegistrationView({ config }: { config: Config | null }) {
         <div className="space-y-4 mb-8">
           <div className="flex items-center gap-3 text-white/90 font-medium">
             <Calendar className="text-primary" size={20} />
-            <span>{config?.eventDate}</span>
+            <span>{config?.eventDate ? formatDate(config.eventDate) : ''}</span>
           </div>
           <div className="flex items-center gap-3 text-white/90 font-medium">
             <MapPin className="text-primary" size={20} />
@@ -587,7 +585,7 @@ function RegistrationView({ config }: { config: Config | null }) {
             <button 
               type="submit"
               disabled={status === 'loading'}
-              className="w-full py-4 bg-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
+              className="w-full py-4 bg-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 active:brightness-90 active:shadow-none transition-all disabled:opacity-50 disabled:scale-100"
             >
               {status === 'loading' ? 'Registrando...' : 'Confirmar Registro'}
             </button>
