@@ -230,12 +230,14 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen relative">
+    <div className="relative min-h-screen w-full">
       {/* Fixed background layer for parallax effect on mobile */}
       <div className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'linear-gradient(rgba(0,0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(/fotoashly.webp)' }} />
       
+      <div className="min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="p-4 flex justify-between items-center max-w-5xl mx-auto border-b border-white/10">
+      <nav className="w-full border-b border-white/10">
+        <div className="max-w-5xl mx-auto flex justify-between items-center px-4 py-4">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
           <div className="bg-primary p-2 rounded-full text-white shadow-lg shadow-primary/20">
             <Cake size={24} />
@@ -266,6 +268,7 @@ export default function App() {
               Entrar
             </button>
           )}
+        </div>
         </div>
       </nav>
 
@@ -303,8 +306,10 @@ export default function App() {
         </AnimatePresence>
       </main>
 
+      </div>
+
       {/* Footer */}
-      <footer className="mt-20">
+      <footer>
         <Footer />
       </footer>
     </div>
