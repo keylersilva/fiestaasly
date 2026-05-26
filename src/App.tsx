@@ -41,9 +41,12 @@ import {
   Phone,
   X,
   MessageCircle,
-  Sparkles
+  Sparkles,
+  Clock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+
+const EVENT_DATE = new Date('2026-07-05T16:00:00');
 
 const LOCAL_SESSION_PATH = '/api/sessions/cbf35a2c-52bb-463d-8d38-38487ed8c824/messages/send-text';
 const SESSION_URL = import.meta.env.VITE_OPENWA_URL || LOCAL_SESSION_PATH;
@@ -448,6 +451,22 @@ function RegistrationView({ config }: { config: Config | null }) {
     return () => unsubscribe();
   }, []);
 
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
+
+  useEffect(() => {
+    const update = () => {
+      const diff = EVENT_DATE.getTime() - Date.now();
+      if (diff <= 0) return setTimeLeft({ days: 0, hours: 0, minutes: 0 });
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      setTimeLeft({ days, hours, minutes });
+    };
+    update();
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, []);
+
   useEffect(() => {
     if (showSuccessModal) {
       confetti({
@@ -529,6 +548,19 @@ function RegistrationView({ config }: { config: Config | null }) {
             <MapPin className="text-primary" size={20} />
             <span>Calle de las Hadas #123, Ciudad Mágica</span>
           </div>
+          {timeLeft.days > 0 && (
+            <div className="flex items-center gap-3 text-white/90">
+              <Clock className="text-primary shrink-0" size={20} />
+              <span className="font-bold">
+                <span className="text-primary">{timeLeft.days}</span>
+                <span className="text-white/70 text-xs ml-1">días</span>
+                <span className="text-primary ml-2">{timeLeft.hours}</span>
+                <span className="text-white/70 text-xs ml-1">h</span>
+                <span className="text-primary ml-2">{timeLeft.minutes}</span>
+                <span className="text-white/70 text-xs ml-1">min</span>
+              </span>
+            </div>
+          )}
         </div>
 
         <p className="text-lg text-white/80 leading-relaxed max-w-lg italic font-medium drop-shadow-sm">
