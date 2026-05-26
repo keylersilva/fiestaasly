@@ -105,6 +105,15 @@ async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolea
   }
 }
 
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString('es-ES', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+}
+
 // Types
 interface Config {
   totalSpots: number;
@@ -504,7 +513,7 @@ function RegistrationView({ config }: { config: Config | null }) {
         <div className="space-y-4 mb-8">
           <div className="flex items-center gap-3 text-white/90 font-medium">
             <Calendar className="text-primary" size={20} />
-            <span>{config?.eventDate}</span>
+            <span>{config?.eventDate ? formatDate(config.eventDate) : ''}</span>
           </div>
           <div className="flex items-center gap-3 text-white/90 font-medium">
             <MapPin className="text-primary" size={20} />
