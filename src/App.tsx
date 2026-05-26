@@ -531,21 +531,24 @@ function RegistrationView({ config }: { config: Config | null }) {
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
+        className="flex flex-col justify-center min-h-[80dvh] sm:min-h-0"
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-          <Baby size={14} /> Celebremos Juntos
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+            <Baby size={14} /> Celebremos Juntos
+          </div>
+          <h1 className="text-4xl sm:text-6xl font-serif text-white leading-tight mb-6 drop-shadow-md">
+            {config?.eventName || "Cargando..."}
+          </h1>
         </div>
-        <h1 className="text-5xl sm:text-6xl font-serif text-white leading-tight mb-6 drop-shadow-md">
-          {config?.eventName || "Cargando..."}
-        </h1>
         
         <div className="space-y-4 mb-8">
           <div className="flex items-center gap-3 text-white/90 font-medium">
-            <Calendar className="text-primary" size={20} />
+            <Calendar className="text-primary shrink-0" size={20} />
             <span>{config?.eventDate ? formatDate(config.eventDate) : ''}</span>
           </div>
           <div className="flex items-center gap-3 text-white/90 font-medium">
-            <MapPin className="text-primary" size={20} />
+            <MapPin className="text-primary shrink-0" size={20} />
             <span>Calle de las Hadas #123, Ciudad Mágica</span>
           </div>
           {timeLeft.days > 0 && (
@@ -566,9 +569,17 @@ function RegistrationView({ config }: { config: Config | null }) {
         <p className="text-lg text-white/80 leading-relaxed max-w-lg italic font-medium drop-shadow-sm">
           "Un año de sonrisas, descubrimientos y mucho amor. Queremos que seas parte de este momento tan especial para nuestra familia."
         </p>
+
+        <button
+          onClick={() => document.getElementById('registro')?.scrollIntoView({ behavior: 'smooth' })}
+          className="mt-8 w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-primary to-accent text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
+        >
+          ✨ Confirmar mi Asistencia
+        </button>
       </motion.div>
 
       <motion.div 
+        id="registro"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="bg-white/80 backdrop-blur-sm p-8 rounded-[2rem] shadow-xl shadow-zinc-200/50 border border-zinc-100 relative overflow-hidden"
@@ -579,7 +590,12 @@ function RegistrationView({ config }: { config: Config | null }) {
            </div>
         </div>
 
-        <h2 className="text-2xl font-serif mb-6">Confirma tu Asistencia</h2>
+        <div className="text-center mb-6">
+          <div className="inline-block bg-gradient-to-r from-primary to-accent text-white px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider shadow-lg shadow-primary/20 mb-3">
+            ✨ ¡Regístrate Aquí! ✨
+          </div>
+          <h2 className="text-2xl font-serif">Confirma tu Asistencia</h2>
+        </div>
         
         {isFull ? (
           <div className="bg-red-50 p-6 rounded-xl text-red-700 text-sm">
