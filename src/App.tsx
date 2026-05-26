@@ -427,7 +427,7 @@ function Footer() {
 // --- SUB-COMPONENTS ---
 
 function RegistrationView({ config }: { config: Config | null }) {
-  const [formData, setFormData] = useState({ name: '', whatsapp: '', companions: 0 });
+  const [formData, setFormData] = useState({ name: '', whatsapp: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [totalRegistered, setTotalRegistered] = useState(0);
@@ -440,7 +440,7 @@ function RegistrationView({ config }: { config: Config | null }) {
     const unsubscribe = onSnapshot(collection(db, 'guests'), (snapshot) => {
       let count = 0;
       snapshot.forEach(doc => {
-        count += (1 + (doc.data().companions || 0));
+        count += 1;
       });
       setTotalRegistered(count);
     });
@@ -462,7 +462,7 @@ function RegistrationView({ config }: { config: Config | null }) {
       const guestData = {
         name: formData.name,
         whatsapp: formData.whatsapp,
-        companions: Number(formData.companions),
+        companions: 0,
         checkedIn: false,
         registeredAt: Timestamp.now(),
         verificationCode
@@ -485,7 +485,7 @@ function RegistrationView({ config }: { config: Config | null }) {
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    setFormData({ name: '', whatsapp: '', companions: 0 });
+    setFormData({ name: '', whatsapp: '' });
     setStatus('idle');
   };
 
@@ -569,18 +569,7 @@ function RegistrationView({ config }: { config: Config | null }) {
                 placeholder="+57 300 123 4567"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">Acompañantes</label>
-              <select 
-                value={formData.companions}
-                onChange={e => setFormData({...formData, companions: Number(e.target.value)})}
-                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              >
-                {[0, 1, 2, 3, 4, 5].map(n => (
-                  <option key={n} value={n}>{n === 0 ? 'Sólo yo' : `Yo + ${n} personas`}</option>
-                ))}
-              </select>
-            </div>
+
 
             <button 
               type="submit"
