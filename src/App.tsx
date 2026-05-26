@@ -44,10 +44,10 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const VITE_SESSION_PATH = '/api/sessions/cbf35a2c-52bb-463d-8d38-38487ed8c824/messages/send-text';
+const LOCAL_SESSION_PATH = '/api/sessions/cbf35a2c-52bb-463d-8d38-38487ed8c824/messages/send-text';
+const SESSION_URL = import.meta.env.VITE_OPENWA_URL || LOCAL_SESSION_PATH;
 
-// 🔑 Declaramos tu Llave Maestra de OpenWA
-const OPENWA_API_KEY = 'owa_k1_1df2f9608590d79647db52e85b15ff4a774daabb3de6f52736ca5b7cf1a1e3e5';
+const OPENWA_API_KEY = import.meta.env.VITE_OPENWA_API_KEY || 'owa_k1_1df2f9608590d79647db52e85b15ff4a774daabb3de6f52736ca5b7cf1a1e3e5';
 
 function normalizePhoneNumber(phone: string): string {
   let cleaned = phone.replace(/[\s\-\(\)]/g, '');
@@ -89,7 +89,7 @@ async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolea
   console.log("🚀 Disparando mensaje directo a Ngrok...");
 
   try {
-    const response = await fetch(VITE_SESSION_PATH, {
+    const response = await fetch(SESSION_URL, {
       method: 'POST',
       headers: requestHeaders,
       body: JSON.stringify({ chatId, text }),
