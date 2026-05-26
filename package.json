@@ -10,6 +10,7 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "ngrok": ".bin/ngrok http 2785",
+    "ngrok:app": ".bin/ngrok http 3000",
     "deploy:build": "vite build",
     "functions:deploy": "cd functions && npm install && cd .. && firebase deploy --only functions"
   },

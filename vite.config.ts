@@ -28,6 +28,10 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/proxy/, '/api'),
         },
+        '/api/sessions': {
+          target: 'http://localhost:2785',
+          changeOrigin: true,
+        },
       },
 
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

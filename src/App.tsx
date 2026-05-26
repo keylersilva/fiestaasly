@@ -44,9 +44,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const OPENWA_SESSION_URL = import.meta.env.VITE_OPENWA_URL || 'https://mashing-aim-abstain.ngrok-free.dev/api/sessions/99b69377-735a-4ceb-bfc9-d69c9b1f66b6/messages/send-text';
-const API_FUNCTION_URL = import.meta.env.VITE_FUNCTION_URL || '/api/send-whatsapp';
-const VITE_PROXY_URL = '/api/proxy/sessions/99b69377-735a-4ceb-bfc9-d69c9b1f66b6/messages/send-text';
+const VITE_SESSION_PATH = '/api/sessions/cbf35a2c-52bb-463d-8d38-38487ed8c824/messages/send-text';
 
 // 🔑 Declaramos tu Llave Maestra de OpenWA
 const OPENWA_API_KEY = 'owa_k1_1df2f9608590d79647db52e85b15ff4a774daabb3de6f52736ca5b7cf1a1e3e5';
@@ -91,7 +89,7 @@ async function sendWhatsAppMessage(chatId: string, text: string): Promise<boolea
   console.log("🚀 Disparando mensaje directo a Ngrok...");
 
   try {
-    const response = await fetch(OPENWA_SESSION_URL, {
+    const response = await fetch(VITE_SESSION_PATH, {
       method: 'POST',
       headers: requestHeaders,
       body: JSON.stringify({ chatId, text }),
