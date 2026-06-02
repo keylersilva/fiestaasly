@@ -41,8 +41,12 @@ import {
   Phone,
   X,
   MessageCircle,
-  Sparkles
+  Sparkles,
+  Clock
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
+
+const EVENT_DATE = new Date('2026-07-05T16:00:00');
 
 const LOCAL_SESSION_PATH = '/api/sessions/cbf35a2c-52bb-463d-8d38-38487ed8c824/messages/send-text';
 const SESSION_URL = import.meta.env.VITE_OPENWA_URL || LOCAL_SESSION_PATH;
@@ -427,7 +431,7 @@ function Footer() {
 // --- SUB-COMPONENTS ---
 
 function RegistrationView({ config }: { config: Config | null }) {
-  const [formData, setFormData] = useState({ name: '', whatsapp: '', companions: 0 });
+  const [formData, setFormData] = useState({ name: '', whatsapp: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [totalRegistered, setTotalRegistered] = useState(0);
@@ -440,12 +444,39 @@ function RegistrationView({ config }: { config: Config | null }) {
     const unsubscribe = onSnapshot(collection(db, 'guests'), (snapshot) => {
       let count = 0;
       snapshot.forEach(doc => {
-        count += (1 + (doc.data().companions || 0));
+        count += 1;
       });
       setTotalRegistered(count);
     });
     return () => unsubscribe();
   }, []);
+
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
+
+  useEffect(() => {
+    const update = () => {
+      const diff = EVENT_DATE.getTime() - Date.now();
+      if (diff <= 0) return setTimeLeft({ days: 0, hours: 0, minutes: 0 });
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      setTimeLeft({ days, hours, minutes });
+    };
+    update();
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (showSuccessModal) {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#FFD700', '#FF69B4', '#87CEEB', '#98FB98', '#DDA0DD', '#FF6B6B']
+      });
+    }
+  }, [showSuccessModal]);
 
   const spotsLeft = config ? config.totalSpots - totalRegistered : 0;
   const isFull = spotsLeft <= 0;
@@ -462,7 +493,7 @@ function RegistrationView({ config }: { config: Config | null }) {
       const guestData = {
         name: formData.name,
         whatsapp: formData.whatsapp,
-        companions: Number(formData.companions),
+        companions: 0,
         checkedIn: false,
         registeredAt: Timestamp.now(),
         verificationCode
@@ -485,7 +516,7 @@ function RegistrationView({ config }: { config: Config | null }) {
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    setFormData({ name: '', whatsapp: '', companions: 0 });
+    setFormData({ name: '', whatsapp: '' });
     setStatus('idle');
   };
 
@@ -500,31 +531,55 @@ function RegistrationView({ config }: { config: Config | null }) {
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
+        className="flex flex-col justify-center min-h-[80dvh] sm:min-h-0"
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-          <Baby size={14} /> Celebremos Juntos
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+            <Baby size={14} /> Celebremos Juntos
+          </div>
+          <h1 className="text-4xl sm:text-6xl font-serif text-white leading-tight mb-6 drop-shadow-md">
+            {config?.eventName || "Cargando..."}
+          </h1>
         </div>
-        <h1 className="text-5xl sm:text-6xl font-serif text-white leading-tight mb-6 drop-shadow-md">
-          {config?.eventName || "Cargando..."}
-        </h1>
         
         <div className="space-y-4 mb-8">
           <div className="flex items-center gap-3 text-white/90 font-medium">
-            <Calendar className="text-primary" size={20} />
+            <Calendar className="text-primary shrink-0" size={20} />
             <span>{config?.eventDate ? formatDate(config.eventDate) : ''}</span>
           </div>
           <div className="flex items-center gap-3 text-white/90 font-medium">
-            <MapPin className="text-primary" size={20} />
+            <MapPin className="text-primary shrink-0" size={20} />
             <span>Calle de las Hadas #123, Ciudad Mágica</span>
           </div>
+          {timeLeft.days > 0 && (
+            <div className="flex items-center gap-3 text-white/90">
+              <Clock className="text-primary shrink-0" size={20} />
+              <span className="font-bold">
+                <span className="text-primary">{timeLeft.days}</span>
+                <span className="text-white/70 text-xs ml-1">días</span>
+                <span className="text-primary ml-2">{timeLeft.hours}</span>
+                <span className="text-white/70 text-xs ml-1">h</span>
+                <span className="text-primary ml-2">{timeLeft.minutes}</span>
+                <span className="text-white/70 text-xs ml-1">min</span>
+              </span>
+            </div>
+          )}
         </div>
 
         <p className="text-lg text-white/80 leading-relaxed max-w-lg italic font-medium drop-shadow-sm">
           "Un año de sonrisas, descubrimientos y mucho amor. Queremos que seas parte de este momento tan especial para nuestra familia."
         </p>
+
+        <button
+          onClick={() => document.getElementById('registro')?.scrollIntoView({ behavior: 'smooth' })}
+          className="mt-8 w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-primary to-accent text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
+        >
+          ✨ Confirmar mi Asistencia
+        </button>
       </motion.div>
 
       <motion.div 
+        id="registro"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="bg-white/80 backdrop-blur-sm p-8 rounded-[2rem] shadow-xl shadow-zinc-200/50 border border-zinc-100 relative overflow-hidden"
@@ -535,7 +590,12 @@ function RegistrationView({ config }: { config: Config | null }) {
            </div>
         </div>
 
-        <h2 className="text-2xl font-serif mb-6">Confirma tu Asistencia</h2>
+        <div className="text-center mb-6">
+          <div className="inline-block bg-gradient-to-r from-primary to-accent text-white px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider shadow-lg shadow-primary/20 mb-3">
+            ✨ ¡Regístrate Aquí! ✨
+          </div>
+          <h2 className="text-2xl font-serif">Confirma tu Asistencia</h2>
+        </div>
         
         {isFull ? (
           <div className="bg-red-50 p-6 rounded-xl text-red-700 text-sm">
@@ -569,18 +629,7 @@ function RegistrationView({ config }: { config: Config | null }) {
                 placeholder="+57 300 123 4567"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">Acompañantes</label>
-              <select 
-                value={formData.companions}
-                onChange={e => setFormData({...formData, companions: Number(e.target.value)})}
-                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              >
-                {[0, 1, 2, 3, 4, 5].map(n => (
-                  <option key={n} value={n}>{n === 0 ? 'Sólo yo' : `Yo + ${n} personas`}</option>
-                ))}
-              </select>
-            </div>
+
 
             <button 
               type="submit"
@@ -659,7 +708,7 @@ function RegistrationView({ config }: { config: Config | null }) {
                 onClick={handleCloseSuccessModal}
                 className="px-6 py-2 bg-primary text-white rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
               >
-                Registrar a alguien más
+                Cerrar
               </button>
             </div>
           </motion.div>
