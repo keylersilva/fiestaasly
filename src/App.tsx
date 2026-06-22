@@ -77,9 +77,9 @@ function buildConfirmationMessage(name: string): string {
 
 Hola *${name}*, hemos registrado con éxito tu asistencia para el cumpleaños de nuestra bebé Ashly Sofía 🎂✨
 
-📅 *Fecha:* Sábado, 23 de Mayo
-⏰ *Hora:* 4:00 PM
-📍 *Lugar:* [Agregar dirección aquí]
+📅 *Fecha:* Domingo, 5 de Julio
+⏰ *Hora:* 3:00 PM
+📍 *Lugar:* Salon de evento el milagroso - Calle 17 # 10 A 58 
 
 💖 ¡Estamos felices de compartir este momento contigo!`;
 }
@@ -329,12 +329,22 @@ export default function App() {
 
 function Footer() {
   const footerLinks = [
-    { label: 'Inicio', href: '#home' },
-    { label: 'Galería', href: '#gallery' },
-    { label: 'Confirmar asistencia', href: '#rsvp' },
-    { label: 'Ubicación', href: '#location' },
-    { label: 'Contacto', href: '#contact' },
+    { label: 'Inicio', href: '#inicio' },
+    { label: 'Galería', href: '#galeria' },
+    { label: 'Confirmar asistencia', href: '#confirmar-asistencia' },
+    { label: 'Ubicación', href: 'https://maps.app.goo.gl/8FavgDufEsn4DRYP8' },
+    { label: 'Contacto', href: '#contacto' },
   ];
+
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!href.startsWith('#')) return;
+    e.preventDefault();
+    const id = href.slice(1);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const socialLinks = [
     { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
@@ -343,7 +353,7 @@ function Footer() {
   ];
 
   return (
-    <div className="bg-zinc-900/80 backdrop-blur-md border-t border-white/5">
+    <div id="contacto" className="bg-zinc-900/80 backdrop-blur-md border-t border-white/5">
       <div className="max-w-5xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div className="space-y-4">
@@ -367,7 +377,8 @@ function Footer() {
                 <li key={link.label}>
                   <a 
                     href={link.href}
-                    className="text-white/60 text-sm hover:text-primary transition-colors duration-300"
+                    onClick={(e) => scrollToSection(e, link.href)}
+                    className="cursor-pointer text-white/60 text-sm hover:text-primary transition-colors duration-300"
                   >
                     {link.label}
                   </a>
@@ -529,6 +540,7 @@ function RegistrationView({ config }: { config: Config | null }) {
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <motion.div 
+        id="inicio"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         className="flex flex-col justify-center min-h-[80dvh] sm:min-h-0"
@@ -548,8 +560,17 @@ function RegistrationView({ config }: { config: Config | null }) {
             <span>{config?.eventDate ? formatDate(config.eventDate) : ''}</span>
           </div>
           <div className="flex items-center gap-3 text-white/90 font-medium">
+            <Clock className="text-primary shrink-0" size={20} />
+            <span>3:00 PM</span>
+          </div>
+          <div className="flex items-center gap-3 text-white/90 font-medium">
             <MapPin className="text-primary shrink-0" size={20} />
-            <span>Calle de las Hadas #123, Ciudad Mágica</span>
+            <a
+              href="https://maps.app.goo.gl/8FavgDufEsn4DRYP8"
+              className="text-white/90 font-medium hover:text-primary transition-colors duration-300"
+            >
+              Cl. 17 # 10A-58, Sabanalarga, Atlántico - Salón de evento El Milagroso
+            </a>
           </div>
           {timeLeft.days > 0 && (
             <div className="flex items-center gap-3 text-white/90">
@@ -571,7 +592,7 @@ function RegistrationView({ config }: { config: Config | null }) {
         </p>
 
         <button
-          onClick={() => document.getElementById('registro')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => document.getElementById('confirmar-asistencia')?.scrollIntoView({ behavior: 'smooth' })}
           className="mt-8 w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-primary to-accent text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
         >
           ✨ Confirmar mi Asistencia
@@ -579,7 +600,7 @@ function RegistrationView({ config }: { config: Config | null }) {
       </motion.div>
 
       <motion.div 
-        id="registro"
+        id="confirmar-asistencia"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="bg-white/80 backdrop-blur-sm p-8 rounded-[2rem] shadow-xl shadow-zinc-200/50 border border-zinc-100 relative overflow-hidden"
@@ -647,6 +668,8 @@ function RegistrationView({ config }: { config: Config | null }) {
       </motion.div>
     </div>
 
+    <div id="galeria" className="scroll-mt-24" />
+    <div id="ubicacion" className="scroll-mt-24" />
     <AnimatePresence>
       {showSuccessModal && (
         <motion.div
