@@ -77,9 +77,9 @@ function buildConfirmationMessage(name: string): string {
 
 Hola *${name}*, hemos registrado con éxito tu asistencia para el cumpleaños de nuestra bebé Ashly Sofía 🎂✨
 
-📅 *Fecha:* Sábado, 23 de Mayo
-⏰ *Hora:* 4:00 PM
-📍 *Lugar:* [Agregar dirección aquí]
+📅 *Fecha:* Domingo, 5 de Julio
+⏰ *Hora:* 3:00 PM
+📍 *Lugar:* Salon de evento el milagroso - Calle 17 # 10 A 58 
 
 💖 ¡Estamos felices de compartir este momento contigo!`;
 }
@@ -548,8 +548,12 @@ function RegistrationView({ config }: { config: Config | null }) {
             <span>{config?.eventDate ? formatDate(config.eventDate) : ''}</span>
           </div>
           <div className="flex items-center gap-3 text-white/90 font-medium">
+            <Clock className="text-primary shrink-0" size={20} />
+            <span>3:00 PM</span>
+          </div>
+          <div className="flex items-center gap-3 text-white/90 font-medium">
             <MapPin className="text-primary shrink-0" size={20} />
-            <span>Calle de las Hadas #123, Ciudad Mágica</span>
+            <span>Cl. 17 # 10A-58, Sabanalarga, Atlántico - Salon de evento el milagroso</span>
           </div>
           {timeLeft.days > 0 && (
             <div className="flex items-center gap-3 text-white/90">
