@@ -243,7 +243,7 @@ export default function App() {
   return (
     <div className="relative min-h-screen w-full">
       {/* Fixed background layer for parallax effect on mobile */}
-      <div className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'linear-gradient(rgba(0,0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(/fotoashly.webp)' }} />
+      <div className="fixed inset-0 -z-10 bg-cover bg-no-repeat main-bg" style={{ backgroundImage: 'linear-gradient(rgba(0,0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(/principalfoto.webp)' }} />
       
       <div className="min-h-screen flex flex-col">
       {/* Navigation */}
@@ -617,6 +617,20 @@ function RegistrationView({ config }: { config: Config | null }) {
           </div>
           <h2 className="text-2xl font-serif">Confirma tu Asistencia</h2>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-4 bg-primary/5 backdrop-blur-sm border border-primary/20 rounded-2xl text-center shadow-sm"
+        >
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="text-xl" role="img" aria-label="ticket">🎟️</span>
+            <span className="text-sm font-black uppercase tracking-wider text-primary">Registro obligatorio</span>
+          </div>
+          <p className="text-xs text-zinc-600 leading-relaxed">
+            Para garantizar tu ingreso y el de tus acompañantes, es necesario completar la confirmación de asistencia. Los cupos se asignarán únicamente a las personas que se registren previamente.
+          </p>
+        </motion.div>
         
         {isFull ? (
           <div className="bg-red-50 p-6 rounded-xl text-red-700 text-sm">
