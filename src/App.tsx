@@ -79,7 +79,10 @@ Hola *${name}*, hemos registrado con éxito tu asistencia para el cumpleaños de
 
 📅 *Fecha:* Domingo, 5 de Julio
 ⏰ *Hora:* 3:00 PM
-📍 *Lugar:* Salon de evento el milagroso - Calle 17 # 10 A 58 
+📍 *Lugar:* Calle 12 #34B-47 – Salón Villaguadalupe
+
+📌 Referencia:
+Diagonal a la Feria.
 
 💖 ¡Estamos felices de compartir este momento contigo!`;
 }
@@ -569,7 +572,7 @@ function RegistrationView({ config }: { config: Config | null }) {
               href="https://maps.app.goo.gl/8FavgDufEsn4DRYP8"
               className="text-white/90 font-medium hover:text-primary transition-colors duration-300"
             >
-              Cl. 17 # 10A-58, Sabanalarga, Atlántico - Salón de evento El Milagroso
+              Calle 12 #34B-47 – Salón Villaguadalupe
             </a>
           </div>
           {timeLeft.days > 0 && (
