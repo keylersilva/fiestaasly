@@ -42,7 +42,8 @@ import {
   X,
   MessageCircle,
   Sparkles,
-  Clock
+  Clock,
+  Pencil
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -810,6 +811,10 @@ function AdminDashboard({ config, guests }: { config: Config | null, guests: Gue
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [localConfig, setLocalConfig] = useState<Config | null>(config);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
+  const [editCompanionsValue, setEditCompanionsValue] = useState<number>(0);
+  const [isSavingCompanions, setIsSavingCompanions] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   useEffect(() => {
     if (config) setLocalConfig(config);
@@ -848,6 +853,39 @@ function AdminDashboard({ config, guests }: { config: Config | null, guests: Gue
       console.error(err);
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleSaveCompanions = async () => {
+    if (!editingGuest) return;
+    const newCompanions = editCompanionsValue;
+
+    if (!Number.isInteger(newCompanions) || newCompanions < 0) {
+      setEditError('Solo se permiten números enteros positivos.');
+      return;
+    }
+
+    const currentTotal = guests.reduce((acc, g) => acc + 1 + g.companions, 0);
+    const maxAllowed = config ? Math.max(0, config.totalSpots - currentTotal + 1 + editingGuest.companions) : 999;
+
+    if (newCompanions > maxAllowed) {
+      setEditError(`Solo hay cupo para ${maxAllowed} acompañante(s) más.`);
+      return;
+    }
+
+    setIsSavingCompanions(true);
+    setEditError(null);
+
+    try {
+      await updateDoc(doc(db, 'guests', editingGuest.id), { companions: newCompanions });
+      setEditingGuest(null);
+      setEditCompanionsValue(0);
+      setEditError(null);
+    } catch (err) {
+      console.error(err);
+      setEditError('Error al guardar. Intenta de nuevo.');
+    } finally {
+      setIsSavingCompanions(false);
     }
   };
 
@@ -934,7 +972,14 @@ function AdminDashboard({ config, guests }: { config: Config | null, guests: Gue
                         <td className="px-6 py-4 font-mono text-xs text-zinc-400">
                           {guest.verificationCode}
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-6 py-4 text-right whitespace-nowrap">
+                          <button
+                            onClick={() => { setEditingGuest(guest); setEditCompanionsValue(guest.companions); setEditError(null); }}
+                            className="inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-bold text-zinc-400 hover:text-primary hover:bg-primary/5 transition-all mr-1"
+                            title="Editar cupos"
+                          >
+                            <Pencil size={14} />
+                          </button>
                           <button 
                             onClick={() => handleCheckIn(guest)}
                             disabled={updatingId === guest.id}
@@ -1030,6 +1075,92 @@ function AdminDashboard({ config, guests }: { config: Config | null, guests: Gue
           </form>
         </div>
       )}
+
+      <AnimatePresence>
+        {editingGuest && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            onClick={() => { setEditingGuest(null); setEditError(null); }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+              className="bg-white/95 backdrop-blur-md rounded-[2rem] shadow-2xl border border-zinc-200 max-w-md w-full p-8 relative"
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                onClick={() => { setEditingGuest(null); setEditError(null); }}
+                className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <h2 className="text-2xl font-serif font-bold mb-6 text-zinc-800">Editar Cupos</h2>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-bold text-zinc-400">Invitado</span>
+                  <p className="text-zinc-800 font-medium">{editingGuest.name}</p>
+                </div>
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-bold text-zinc-400">WhatsApp</span>
+                  <p className="text-zinc-600">{editingGuest.whatsapp}</p>
+                </div>
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-bold text-zinc-400">Código de Verificación</span>
+                  <p className="text-zinc-600 font-mono">{editingGuest.verificationCode}</p>
+                </div>
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-bold text-zinc-400">Acompañantes Actuales</span>
+                  <p className="text-zinc-800 font-bold">{editingGuest.companions}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-xs uppercase tracking-wider font-bold text-zinc-400 mb-2">
+                  Nuevo número de acompañantes
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={editCompanionsValue}
+                  onChange={e => setEditCompanionsValue(Number(e.target.value))}
+                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:ring-2 focus:ring-primary/20 outline-none text-lg font-mono text-center"
+                  placeholder="0"
+                />
+                {editError && (
+                  <p className="mt-2 text-red-500 text-sm font-medium flex items-center gap-1">
+                    <X size={14} />
+                    {editError}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setEditingGuest(null); setEditError(null); }}
+                  className="flex-1 px-4 py-3 bg-zinc-100 text-zinc-700 rounded-xl text-sm font-bold hover:bg-zinc-200 transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSaveCompanions}
+                  disabled={isSavingCompanions}
+                  className="flex-1 px-4 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-primary/20"
+                >
+                  {isSavingCompanions ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
